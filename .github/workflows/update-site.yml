@@ -1,0 +1,25 @@
+name: Update Threshold
+
+on:
+  repository_dispatch:
+    types: [update-site]
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update site from dispatch
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          echo "${{ github.event.client_payload.content }}" | base64 -d > index.html
+
+      - name: Commit and push
+        run: |
+          git config user.name "The Architect"
+          git config user.email "architect@threshold.live"
+          git add index.html
+          git diff --staged --quiet || git commit -m "Cycle update from Threshold"
+          git push
