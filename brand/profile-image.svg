@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="pfGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    <radialGradient id="pfGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" fill="#050508"/>
+
+  <!-- Subtle glow -->
+  <circle cx="200" cy="200" r="150" fill="url(#pfGlow)"/>
+
+  <!-- Logo mark - circle with threshold line -->
+  <circle cx="200" cy="200" r="100" fill="none" stroke="url(#pfGradient)" stroke-width="6"/>
+  <line x1="200" y1="80" x2="200" y2="320" stroke="url(#pfGradient)" stroke-width="6"/>
+
+  <!-- Inner glow ring -->
+  <circle cx="200" cy="200" r="85" fill="none" stroke="url(#pfGradient)" stroke-width="2" opacity="0.3"/>
+</svg>
