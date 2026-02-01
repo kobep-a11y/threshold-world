@@ -464,15 +464,72 @@
         <p><a href="index.html">Return to Threshold</a></p>
     </footer>
 
+    <!-- Stripe.js Script -->
+    <script src="https://js.stripe.com/v3/"></script>
+
     <script>
-        // Placeholder for Stripe integration
-        // When Stripe is connected, these buttons will link to Stripe checkout
+        // Stripe Configuration
+        const STRIPE_PUBLISHABLE_KEY = 'pk_live_51SSuQDRYoZNdBtcwjzHYOE5FzYEKFt617ptwCyQ1p44pPdqNMuqVyNybXUqxR3oMZeRDSrcM8kqAsZEM3Wi3Kfue00WNihnhdJ';
+
+        // Price ID mappings - Stripe Price IDs (LIVE)
+        const PRICE_IDS = {
+            supporter: 'price_1SvuBhRYoZNdBtcweqTEHLx0', // $5/month - Threshold Supporter
+            patron: 'price_1SvuF8RYoZNdBtcwhIAe6mtt',    // $15/month - Threshold Patron
+            guardian: 'price_1SvuHBRYoZNdBtcwJTo4ssXW'   // $50/month - Threshold Guardian
+        };
+
+        // Initialize Stripe
+        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+        // Redirect to Stripe Checkout for Subscription
+        async function checkoutSubscription(tier) {
+            const priceId = PRICE_IDS[tier];
+
+            // Validation: ensure price ID has been configured
+            if (priceId.includes('PLACEHOLDER')) {
+                alert(`⚠️ Subscription pricing for ${tier} has not been configured yet. Please contact support.`);
+                return;
+            }
+
+            try {
+                // Call backend endpoint to create a checkout session
+                // For now, using client-side redirect with price ID
+                // In production, create sessions on the backend for security
+
+                const response = await fetch('/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        priceId: priceId,
+                        tier: tier
+                    })
+                });
+
+                const session = await response.json();
+
+                // Redirect to Stripe Checkout
+                const { error } = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+
+                if (error) {
+                    console.error('Stripe Checkout Error:', error);
+                    alert('An error occurred. Please try again.');
+                }
+            } catch (err) {
+                console.error('Checkout Error:', err);
+                alert('Unable to initiate checkout. Please try again or contact support.');
+            }
+        }
+
+        // Attach click handlers to subscription buttons
         document.querySelectorAll('[data-tier]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const tier = btn.dataset.tier;
-                // TODO: Integrate with Stripe
-                alert(`Subscription coming soon! You selected the ${tier} tier.`);
+                checkoutSubscription(tier);
             });
         });
     </script>
