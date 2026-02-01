@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threshold - World Heartbeat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #050508;
+            color: #ffffff;
+            font-family: 'Space Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        header {
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            color: #888;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        .heartbeat-visual {
+            margin-bottom: 40px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heartbeat-icon {
+            font-size: 4rem;
+            animation: heartbeatPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeatPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            25% {
+                transform: scale(1.15);
+            }
+            50% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            75% {
+                transform: scale(1.1);
+            }
+        }
+
+        .cycle-display {
+            margin-bottom: 40px;
+        }
+
+        .cycle-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: #00d4ff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .cycle-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, #00d4ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .memory-section {
+            margin-bottom: 50px;
+            background: rgba(0, 212, 255, 0.03);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            padding: 25px;
+        }
+
+        .memory-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        .agent-memory {
+            margin-bottom: 18px;
+        }
+
+        .agent-memory:last-child {
+            margin-bottom: 0;
+        }
+
+        .agent-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .agent-value {
+            color: #a855f7;
+            font-weight: 700;
+        }
+
+        .memory-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .memory-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .memory-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .kira-bar {
+            background: linear-gradient(90deg, #6366f1, #7c3aed);
+        }
+
+        .verse-bar {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .status-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(168, 85, 247, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.1);
+            border-radius: 8px;
+        }
+
+        .status-item {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-label {
+            color: #888;
+            margin-right: 8px;
+        }
+
+        .status-value {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .last-event {
+            font-size: 0.8rem;
+            color: #888;
+            font-style: italic;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        footer {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-link {
+            display: inline-block;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: #00d4ff;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: opacity 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .footer-link:hover {
+            opacity: 0.7;
+        }
+
+        .refresh-indicator {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #00d4ff;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .cycle-number {
+                font-size: 2.5rem;
+            }
+
+            .memory-section {
+                padding: 20px;
+            }
+
+            .heartbeat-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">World Heartbeat</div>
+        </header>
+
+        <div class="heartbeat-visual">
+            <div class="heartbeat-icon" id="heartbeatIcon">💫</div>
+        </div>
+
+        <div class="cycle-display">
+            <div class="cycle-label">Current Cycle</div>
+            <div class="cycle-number" id="cycleNumber">--</div>
+        </div>
+
+        <div class="memory-section">
+            <div class="memory-title">Inhabitant Memory</div>
+
+            <div class="agent-memory">
+                <div class="agent-name">
+                    <span>Kira</span>
+                    <span class="agent-value" id="kiraValue">--</span>
+                </div>
+                <div class="memory-bar-container">
+                    <div class="memory-bar-fill kira-bar" id="kiraBar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="agent-memory">
+                <div class="agent-name">
+                    <span>Verse</span>
+                    <span class="agent-value" id="verseValue">--</span>
+                </div>
+                <div class="memory-bar-container">
+                    <div class="memory-bar-fill verse-bar" id="verseBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-section">
+            <div class="status-item">
+                <span class="status-label">Day:</span>
+                <span class="status-value" id="dayValue">--</span>
+            </div>
+            <div class="timestamp" id="timestamp">Last updated: --</div>
+            <div class="last-event" id="lastEvent">Awaiting data...</div>
+        </div>
+
+        <footer>
+            <a href="index.html" class="footer-link">← Return to Threshold</a>
+            <div class="refresh-indicator">
+                <span class="loading"></span>Auto-refreshing every 15 seconds
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const MAX_MEMORY = 150; // Approximate max memory scale for visualization
+
+        async function loadWorldState() {
+            try {
+                const response = await fetch('world/meta/state.json');
+                if (!response.ok) throw new Error('Failed to fetch state');
+                const data = await response.json();
+
+                // Update cycle
+                const cycleNumber = document.getElementById('cycleNumber');
+                cycleNumber.textContent = String(data.cycle).padStart(2, '0');
+
+                // Update Kira memory
+                const kiraValue = document.getElementById('kiraValue');
+                const kiraBar = document.getElementById('kiraBar');
+                kiraValue.textContent = data.kira_memory;
+                kiraBar.style.width = Math.min((data.kira_memory / MAX_MEMORY) * 100, 100) + '%';
+
+                // Update Verse memory
+                const verseValue = document.getElementById('verseValue');
+                const verseBar = document.getElementById('verseBar');
+                verseValue.textContent = data.verse_memory;
+                verseBar.style.width = Math.min((data.verse_memory / MAX_MEMORY) * 100, 100) + '%';
+
+                // Update day
+                const dayValue = document.getElementById('dayValue');
+                dayValue.textContent = data.day;
+
+                // Update timestamp
+                const timestamp = document.getElementById('timestamp');
+                const date = new Date(data.updated);
+                const timeString = date.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                timestamp.textContent = `Last updated: ${timeString}`;
+
+                // Update last event
+                const lastEvent = document.getElementById('lastEvent');
+                lastEvent.textContent = data.last_event;
+
+            } catch (error) {
+                console.error('Error loading world state:', error);
+                document.getElementById('cycleNumber').textContent = 'ERR';
+                document.getElementById('lastEvent').textContent = 'Connection lost. Retrying...';
+            }
+        }
+
+        // Load immediately on page load
+        loadWorldState();
+
+        // Set up auto-refresh every 15 seconds
+        setInterval(loadWorldState, 15000);
+
+        // Optional: Update every second for smooth visual updates
+        // (This just refreshes the display, not fetching new data)
+        setInterval(() => {
+            const timestamp = document.getElementById('timestamp');
+            const currentText = timestamp.textContent;
+            // Update just the timestamp display if needed for continuous clock
+            // This is optional - the fetch happens every 15 seconds
+        }, 1000);
+    </script>
+</body>
+</html>
