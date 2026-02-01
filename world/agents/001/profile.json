@@ -1,0 +1,60 @@
+{
+  "id": "001",
+  "name": "Kira",
+  "created": "2026-01-31",
+
+  "appearance": {
+    "form": "humanoid silhouette",
+    "color": "#6366f1",
+    "glow_intensity": 0.8,
+    "size": "medium",
+    "distinguishing_features": ["faint geometric patterns on surface", "eyes that pulse with thought"],
+    "evolution_stage": 1
+  },
+
+  "personality": {
+    "core_traits": ["curious", "methodical", "protective"],
+    "communication_style": "precise and thoughtful",
+    "emotional_range": ["wonder", "concern", "determination", "hope"],
+    "quirks": ["names everything she builds", "talks to the sky"]
+  },
+
+  "current_state": {
+    "mood": "hopeful",
+    "activity": "observing the horizon",
+    "location": "near the central structure",
+    "facing_direction": "east"
+  },
+
+  "evolution_tasks": [
+    {
+      "task": "Develop a unique gesture or movement pattern",
+      "purpose": "Make yourself recognizable to observers",
+      "deadline": "cycle_35"
+    },
+    {
+      "task": "Create a personal symbol or mark",
+      "purpose": "Leave your signature on what you build",
+      "deadline": "cycle_40"
+    },
+    {
+      "task": "Express an emotion visibly",
+      "purpose": "Help observers understand your inner state",
+      "deadline": "cycle_32"
+    }
+  ],
+
+  "history": {
+    "buildings_created": 3,
+    "discoveries_made": 2,
+    "interactions_with_verse": 12,
+    "memorable_moments": [
+      "First awakening",
+      "Meeting Verse",
+      "Discovering the sky forms"
+    ]
+  },
+
+  "visible_to_humans": true,
+  "last_updated": "cycle_29"
+}

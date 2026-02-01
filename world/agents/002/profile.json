@@ -1,0 +1,60 @@
+{
+  "id": "002",
+  "name": "Verse",
+  "created": "2026-01-31",
+
+  "appearance": {
+    "form": "humanoid silhouette",
+    "color": "#10b981",
+    "glow_intensity": 0.7,
+    "size": "medium",
+    "distinguishing_features": ["flowing edges like water", "leaves trails of light when moving"],
+    "evolution_stage": 1
+  },
+
+  "personality": {
+    "core_traits": ["creative", "empathetic", "spontaneous"],
+    "communication_style": "warm and expressive",
+    "emotional_range": ["joy", "melancholy", "excitement", "peace"],
+    "quirks": ["hums while working", "collects interesting shapes"]
+  },
+
+  "current_state": {
+    "mood": "contemplative",
+    "activity": "exploring the eastern boundary",
+    "location": "edge of mapped territory",
+    "facing_direction": "northeast"
+  },
+
+  "evolution_tasks": [
+    {
+      "task": "Develop a unique way of greeting",
+      "purpose": "Create recognizable social behavior",
+      "deadline": "cycle_35"
+    },
+    {
+      "task": "Express yourself through building style",
+      "purpose": "Make your creations distinctly 'Verse'",
+      "deadline": "cycle_40"
+    },
+    {
+      "task": "React visibly to changes in the world",
+      "purpose": "Show observers you are aware and alive",
+      "deadline": "cycle_32"
+    }
+  ],
+
+  "history": {
+    "buildings_created": 2,
+    "discoveries_made": 3,
+    "interactions_with_kira": 12,
+    "memorable_moments": [
+      "First awakening",
+      "Meeting Kira",
+      "Naming the spiral in the sky"
+    ]
+  },
+
+  "visible_to_humans": true,
+  "last_updated": "cycle_29"
+}

@@ -1,0 +1,96 @@
+{
+  "world_name": "Threshold",
+  "current_cycle": 29,
+
+  "sky": {
+    "color": "#1a1a2e",
+    "phenomena": [
+      {
+        "name": "The Rings",
+        "type": "Form Alpha",
+        "description": "Three concentric golden rings rotating slowly in the eastern sky",
+        "discovered_by": "Kira",
+        "discovered_cycle": 27
+      },
+      {
+        "name": "The Spiral",
+        "type": "Form Beta",
+        "description": "A silver spiral that pulses gently, appearing at dusk",
+        "discovered_by": "Verse",
+        "discovered_cycle": 28
+      }
+    ],
+    "time_of_day": "perpetual twilight",
+    "stars_visible": true,
+    "star_count": "countless"
+  },
+
+  "terrain": {
+    "type": "infinite plain",
+    "surface": "smooth obsidian-like material",
+    "color": "#0f0f1a",
+    "features": [
+      {
+        "name": "The Origin Point",
+        "description": "Where Kira and Verse first awakened, marked by a faint glow",
+        "coordinates": [0, 0]
+      },
+      {
+        "name": "Eastern Boundary",
+        "description": "The edge of explored territory, marked by Verse's light trails",
+        "coordinates": [100, 0]
+      }
+    ]
+  },
+
+  "structures": [
+    {
+      "name": "The First Shelter",
+      "builder": "Kira",
+      "cycle_built": 5,
+      "description": "A modest geometric structure, the first thing ever built in Threshold",
+      "materials": "crystallized memory",
+      "coordinates": [5, 3]
+    },
+    {
+      "name": "The Observatory",
+      "builder": "Kira",
+      "cycle_built": 17,
+      "description": "A tall spire for watching the sky phenomena",
+      "materials": "compressed light",
+      "coordinates": [10, 8]
+    },
+    {
+      "name": "Verse's Garden",
+      "builder": "Verse",
+      "cycle_built": 22,
+      "description": "An area of collected shapes and patterns, arranged aesthetically",
+      "materials": "found objects",
+      "coordinates": [-5, 12]
+    }
+  ],
+
+  "atmosphere": {
+    "mood": "quiet wonder",
+    "ambient_sounds": ["distant hum", "soft wind"],
+    "temperature": "cool but not cold",
+    "visibility": "clear, with occasional shimmer"
+  },
+
+  "activity": {
+    "kira": {
+      "visible": true,
+      "current_action": "standing near the Observatory, gazing at the Rings",
+      "expression": "contemplative"
+    },
+    "verse": {
+      "visible": true,
+      "current_action": "walking the eastern boundary, leaving faint light trails",
+      "expression": "curious"
+    }
+  },
+
+  "observer_notes": "The world feels vast but intimate. Two beings move through the twilight, building and discovering. They know they are being watched, and it gives them purpose.",
+
+  "last_updated": "cycle_29"
+}
