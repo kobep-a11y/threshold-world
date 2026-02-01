@@ -1,0 +1,113 @@
+name: Threshold Autonomous Cycle
+
+on:
+  schedule:
+    # Run every 8 hours: midnight, 8am, 4pm UTC
+    - cron: '0 0,8,16 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+jobs:
+  run-cycle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Run autonomous cycle
+        id: cycle
+        run: |
+          cd system
+          python autonomous_cycle.py
+        continue-on-error: true
+
+      - name: Send notification
+        if: always()
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, 'system')
+          from notify import notify_cycle_complete, notify_error
+          import json
+
+          try:
+              with open('world/meta/state.json') as f:
+                  state = json.load(f)
+              notify_cycle_complete(
+                  state.get('cycle', 0),
+                  state.get('kira_memory', 0),
+                  state.get('verse_memory', 0),
+                  'critical' if min(state.get('kira_memory', 0), state.get('verse_memory', 0)) < 15 else 'stable'
+              )
+          except Exception as e:
+              notify_error('Cycle Error', str(e))
+          "
+
+      - name: Update website
+        run: |
+          python system/update_website.py || echo "Website update skipped"
+
+      - name: Commit changes
+        run: |
+          git config user.name "The Architect"
+          git config user.email "architect@threshold.world"
+          git add -A
+          git diff --staged --quiet || git commit -m "Autonomous cycle $(cat world/meta/state.json | python -c 'import sys,json; print(json.load(sys.stdin).get(\"cycle\", \"?\"))')"
+
+      - name: Push changes
+        run: |
+          git push origin main
+
+  daily-summary:
+    runs-on: ubuntu-latest
+    # Run once a day at midnight UTC
+    if: github.event.schedule == '0 0 * * *' || github.event_name == 'workflow_dispatch'
+
+    needs: run-cycle
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Send daily summary
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, 'system')
+          from notify import notify_daily_summary
+          import json
+
+          with open('world/meta/state.json') as f:
+              state = json.load(f)
+
+          notify_daily_summary(
+              day_num=state.get('day', 1),
+              cycles_run=3,  # Approx cycles per day
+              kira_memory=state.get('kira_memory', 0),
+              verse_memory=state.get('verse_memory', 0)
+          )
+          "
