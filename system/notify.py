@@ -25,6 +25,7 @@ class NotificationType(Enum):
     ERROR = "error"
     INTERVENTION_NEEDED = "intervention"
     DAILY_SUMMARY = "summary"
+    LETTER = "letter"
 
 # Webhook URL from environment variable
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
@@ -37,7 +38,11 @@ COLORS = {
     NotificationType.ERROR: 0xFF4500,               # Orange-Red
     NotificationType.INTERVENTION_NEEDED: 0xFF00FF, # Magenta
     NotificationType.DAILY_SUMMARY: 0x0099FF,       # Blue
+    NotificationType.LETTER: 0xE879F9,              # Purple/Pink - Letters
 }
+
+# Separate webhook for letters (optional - falls back to main webhook)
+LETTERS_WEBHOOK_URL = os.environ.get("DISCORD_LETTERS_WEBHOOK_URL", WEBHOOK_URL)
 
 def send_notification(
     notification_type: NotificationType,
@@ -213,6 +218,55 @@ def notify_daily_summary(
         fields=fields,
         action_url="https://watchthreshold.com"
     )
+
+def notify_letter(from_agent, to_recipient, subject, preview, cycle_num, letter_url=None):
+    """Notify when an agent sends a letter to watchers."""
+
+    # Use letters webhook if available, otherwise fall back to main
+    webhook = LETTERS_WEBHOOK_URL or WEBHOOK_URL
+
+    if not webhook:
+        print("Warning: No webhook URL set for letters.")
+        return False
+
+    # Agent colors
+    agent_colors = {
+        "Kira": 0x6366f1,   # Indigo
+        "Verse": 0x10b981,  # Emerald
+    }
+
+    color = agent_colors.get(from_agent, COLORS[NotificationType.LETTER])
+
+    embed = {
+        "title": f"✉️ Letter from {from_agent}",
+        "description": f"**To:** {to_recipient}\n**Subject:** {subject}\n\n---\n\n{preview[:500]}{'...' if len(preview) > 500 else ''}",
+        "color": color,
+        "timestamp": datetime.utcnow().isoformat(),
+        "footer": {
+            "text": f"Cycle {cycle_num} | Reply with !respond {from_agent.lower()} [message]"
+        }
+    }
+
+    if letter_url:
+        embed["url"] = letter_url
+
+    payload = {
+        "username": f"{from_agent} (Threshold)",
+        "embeds": [embed]
+    }
+
+    try:
+        response = requests.post(
+            webhook,
+            json=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        response.raise_for_status()
+        return True
+    except Exception as e:
+        print(f"Failed to send letter notification: {e}")
+        return False
+
 
 # Quick test
 if __name__ == "__main__":
