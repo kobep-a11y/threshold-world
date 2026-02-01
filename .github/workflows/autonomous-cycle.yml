@@ -9,6 +9,9 @@ on:
 env:
   DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
+permissions:
+  contents: write
+
 jobs:
   run-cycle:
     runs-on: ubuntu-latest
