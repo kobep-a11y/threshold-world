@@ -7,6 +7,21 @@
 
 ---
 
+## 📚 Documentation Index
+
+| Document | Purpose |
+|----------|---------|
+| `README.md` | Project overview, quick start, structure |
+| `CONTRIBUTING.md` | Developer workflow, checklists, sync verification |
+| `ARCHITECT.md` | Current state, priorities, session logs (this file) |
+| `ARCHITECT_DECISIONS.md` | Founding technical decisions |
+| `HANDOFF.md` | How the world works |
+| `project_spec.md` | Original vision and philosophy |
+
+**Before every session**: Run `./scripts/verify-sync.sh`
+
+---
+
 ## 🎯 Current Priorities
 
 ### Immediate (Session 5 - COMPLETED)
