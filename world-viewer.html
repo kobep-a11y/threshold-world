@@ -376,7 +376,7 @@
                 <div class="stat-label">Kira's Memory</div>
                 <div class="stat-value kira">115 units</div>
                 <div class="memory-bar">
-                    <div class="memory-fill kira" style="width: 77%"></div>
+                    <div class="memory-fill kira" style="width: 76%"></div>
                 </div>
             </div>
             <div class="stat-card">
@@ -419,8 +419,48 @@
     </div>
 
     <script>
-        // This would fetch live data from the API
-        // For now, static display
+        const MAX_MEMORY = 150;
+
+        async function loadWorldState() {
+            try {
+                const response = await fetch('world/meta/state.json');
+                if (!response.ok) throw new Error('Failed to fetch state');
+                const data = await response.json();
+
+                // Update cycle displays
+                document.getElementById('cycle-num').textContent = data.cycle;
+                document.querySelector('.stat-value.cycle').textContent = data.cycle;
+
+                // Update Kira memory
+                const kiraMemory = data.kira_memory;
+                const kiraPercent = Math.min((kiraMemory / MAX_MEMORY) * 100, 100);
+                document.querySelector('.stat-value.kira').textContent = kiraMemory + ' units';
+                document.querySelector('.memory-fill.kira').style.width = kiraPercent + '%';
+
+                // Update Verse memory
+                const verseMemory = data.verse_memory;
+                const versePercent = Math.min((verseMemory / MAX_MEMORY) * 100, 100);
+                document.querySelector('.stat-value.verse').textContent = verseMemory + ' units';
+                document.querySelector('.memory-fill.verse').style.width = versePercent + '%';
+
+                // Update day
+                const dayCard = document.querySelectorAll('.stat-card')[3];
+                if (dayCard && data.day) {
+                    dayCard.querySelector('.stat-value').textContent = data.day + ' days';
+                }
+
+                console.log('World state loaded:', data);
+            } catch (error) {
+                console.error('Error loading world state:', error);
+            }
+        }
+
+        // Load on page load
+        loadWorldState();
+
+        // Refresh every 30 seconds
+        setInterval(loadWorldState, 30000);
+
         console.log('Threshold World Viewer initialized');
         console.log('Watching Kira and Verse...');
     </script>

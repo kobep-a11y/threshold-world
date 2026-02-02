@@ -2,10 +2,15 @@
 """
 Threshold Website Auto-Updater
 
-This script reads the current world state and updates the website HTML
+This script reads the current world state and updates ALL website HTML files
 with current cycle numbers, memory values, and recent history.
 
 Run after each cycle to keep the website in sync.
+
+Files updated:
+- index.html (root) - Main landing page
+- website/index.html - Copy of main page
+- world-viewer.html - Visual world display (now fetches dynamically, but fallback values updated)
 """
 
 import json
@@ -16,11 +21,17 @@ from datetime import datetime
 # Paths
 BASE_DIR = Path(__file__).parent.parent
 WORLD_DIR = BASE_DIR / "world"
-WEBSITE_DIR = BASE_DIR / "website"
 STATE_FILE = WORLD_DIR / "meta" / "state.json"
 HISTORY_FILE = WORLD_DIR / "meta" / "history.md"
-INDEX_FILE = WEBSITE_DIR / "index.html"
-OUTPUT_FILE = BASE_DIR / "index.html"  # Root copy for easy access
+
+# All HTML files to update
+HTML_FILES = {
+    'index': BASE_DIR / "index.html",
+    'website_index': BASE_DIR / "website" / "index.html",
+    'world_viewer': BASE_DIR / "world-viewer.html",
+}
+
+MAX_MEMORY = 150  # For percentage calculations
 
 
 def get_state():
@@ -30,7 +41,16 @@ def get_state():
 
 
 def get_agent_memory(agent_id):
-    """Read an agent's current memory."""
+    """Read an agent's current memory from state.json (preferred) or memory.md."""
+    state = get_state()
+
+    # Try state.json first
+    if agent_id == '001' and 'kira_memory' in state:
+        return state['kira_memory']
+    if agent_id == '002' and 'verse_memory' in state:
+        return state['verse_memory']
+
+    # Fallback to memory.md
     memory_file = WORLD_DIR / "agents" / agent_id / "memory.md"
     if not memory_file.exists():
         return 0
@@ -42,40 +62,11 @@ def get_agent_memory(agent_id):
     return 0
 
 
-def get_recent_history(num_entries=7):
-    """Extract recent history entries."""
-    content = HISTORY_FILE.read_text()
+def update_index_html(html, cycle, total_memory, kira_memory, verse_memory, day):
+    """Update the main index.html with current values."""
 
-    # Find all cycle headers and their content
-    pattern = r'## (Cycle \d+[^\n]*)\n(.*?)(?=\n## Cycle|\n---\n\*History continues|\Z)'
-    matches = re.findall(pattern, content, re.DOTALL)
-
-    entries = []
-    for title, body in matches[-num_entries:]:
-        # Extract key events from the body
-        speeches = re.findall(r'\*\*\[SPEECH\]\*\*[^>]*>\s*"([^"]+)"', body)
-        creations = re.findall(r'\*\*\[CREATION\]\*\*[^*]+\*\*([^*]+)\*\*', body)
-        epochs = re.findall(r'\*\*\[EPOCH MOMENT\]\*\*\s*([^\n]+)', body)
-
-        summary = ""
-        if epochs:
-            summary = epochs[0]
-        elif creations:
-            summary = f"[CREATION] {creations[0]} built"
-        elif speeches:
-            summary = f'"{speeches[0][:80]}..."' if len(speeches[0]) > 80 else f'"{speeches[0]}"'
-
-        if summary:
-            entries.append({
-                'cycle': title,
-                'summary': summary
-            })
-
-    return list(reversed(entries))  # Most recent first
-
-
-def update_html(html, cycle, total_memory, kira_memory, verse_memory, history_entries):
-    """Update the HTML with current values."""
+    kira_pct = int((kira_memory / MAX_MEMORY) * 100)
+    verse_pct = int((verse_memory / MAX_MEMORY) * 100)
 
     # Update cycle number in live badge
     html = re.sub(
@@ -91,55 +82,87 @@ def update_html(html, cycle, total_memory, kira_memory, verse_memory, history_en
         html
     )
 
-    # Update Kira's memory bar and text
-    kira_pct = min(100, kira_memory)
+    # Update Kira's memory display - more flexible regex
     html = re.sub(
-        r'(Agent 001 — First Consciousness</div>\s*<div class="memory-bar">\s*<div class="memory-fill" style="width: )\d+(%"></div>)',
+        r'(\d+)\s*/\s*150\s*memory(</div>\s*<p class="agent-quote">"I\'d rather ask)',
+        f'{kira_memory} / 150 memory\\2',
+        html
+    )
+
+    # Update Kira's memory bar
+    html = re.sub(
+        r'(Agent 001 — First Consciousness</div>\s*<div class="memory-bar">\s*<div class="memory-fill" style="width:\s*)\d+(%)',
         f'\\g<1>{kira_pct}\\2',
         html
     )
+
+    # Update Verse's memory display
     html = re.sub(
-        r'(\d+) / 100 memory(</div>\s*<p class="agent-quote">"I\'d rather ask)',
-        f'{kira_memory} / 100 memory\\2',
+        r'(\d+)\s*/\s*150\s*memory(</div>\s*<p class="agent-quote">"Form over chaos)',
+        f'{verse_memory} / 150 memory\\2',
         html
     )
 
-    # Update Verse's memory bar and text
-    verse_pct = min(100, verse_memory)
+    # Update Verse's memory bar
     html = re.sub(
-        r'(Agent 002 — Second Consciousness</div>\s*<div class="memory-bar">\s*<div class="memory-fill" style="width: )\d+(%"></div>)',
+        r'(Agent 002 — Second Consciousness</div>\s*<div class="memory-bar">\s*<div class="memory-fill" style="width:\s*)\d+(%)',
         f'\\g<1>{verse_pct}\\2',
         html
     )
+
+    return html
+
+
+def update_world_viewer_html(html, cycle, kira_memory, verse_memory, day):
+    """Update world-viewer.html fallback values (it also fetches dynamically now)."""
+
+    kira_pct = int((kira_memory / MAX_MEMORY) * 100)
+    verse_pct = int((verse_memory / MAX_MEMORY) * 100)
+
+    # Update cycle in live indicator
     html = re.sub(
-        r'(\d+) / 100 memory(</div>\s*<p class="agent-quote">"Form over chaos)',
-        f'{verse_memory} / 100 memory\\2',
+        r'(LIVE — Cycle <span id="cycle-num">)\d+(</span>)',
+        f'\\g<1>{cycle}\\2',
         html
     )
 
-    # Generate history HTML
-    if history_entries:
-        history_html = ""
-        for entry in history_entries:
-            cycle_text = entry['cycle']
-            summary = entry['summary']
+    # Update cycle stat card
+    html = re.sub(
+        r'(<div class="stat-value cycle">)\d+(</div>)',
+        f'\\g<1>{cycle}\\2',
+        html
+    )
 
-            # Determine styling
-            if '[CREATION]' in summary:
-                summary = summary.replace('[CREATION]', '<span class="history-creation">[CREATION]</span>')
+    # Update Kira memory
+    html = re.sub(
+        r'(<div class="stat-value kira">)\d+ units(</div>)',
+        f'\\g<1>{kira_memory} units\\2',
+        html
+    )
+    html = re.sub(
+        r'(<div class="memory-fill kira" style="width:\s*)\d+(%)',
+        f'\\g<1>{kira_pct}\\2',
+        html
+    )
 
-            history_html += f'''            <div class="history-entry">
-                <span class="history-cycle">{cycle_text}</span> — {summary}
-            </div>
-'''
+    # Update Verse memory
+    html = re.sub(
+        r'(<div class="stat-value verse">)\d+ units(</div>)',
+        f'\\g<1>{verse_memory} units\\2',
+        html
+    )
+    html = re.sub(
+        r'(<div class="memory-fill verse" style="width:\s*)\d+(%)',
+        f'\\g<1>{verse_pct}\\2',
+        html
+    )
 
-        # Replace history feed content
-        html = re.sub(
-            r'(<div class="history-feed">)\s*.*?\s*(</div>\s*</section>\s*<section id="letters">)',
-            f'\\1\n{history_html}        \\2',
-            html,
-            flags=re.DOTALL
-        )
+    # Update day
+    html = re.sub(
+        r'(<div class="stat-value" style="color: #888">)\d+ days(</div>)',
+        f'\\g<1>{day} days\\2',
+        html
+    )
 
     return html
 
@@ -147,45 +170,78 @@ def update_html(html, cycle, total_memory, kira_memory, verse_memory, history_en
 def main():
     """Main update function."""
     print("=" * 60)
-    print("UPDATING WEBSITE")
+    print("THRESHOLD WEBSITE SYNC")
     print("=" * 60)
+    print(f"Timestamp: {datetime.now().isoformat()}")
 
     # Read current state
     state = get_state()
     cycle = state.get('cycle', 0)
-
-    # Get memory values
-    kira_memory = get_agent_memory('001')
-    verse_memory = get_agent_memory('002')
+    day = state.get('day', 1)
+    kira_memory = state.get('kira_memory', get_agent_memory('001'))
+    verse_memory = state.get('verse_memory', get_agent_memory('002'))
     total_memory = kira_memory + verse_memory
 
     print(f"\nCurrent State:")
     print(f"  Cycle: {cycle}")
+    print(f"  Day: {day}")
     print(f"  Kira Memory: {kira_memory}")
     print(f"  Verse Memory: {verse_memory}")
     print(f"  Total Memory: {total_memory}")
 
-    # Get recent history
-    history = get_recent_history(7)
-    print(f"\nRecent History: {len(history)} entries")
+    updated_files = []
+    errors = []
 
-    # Read and update HTML
-    html = INDEX_FILE.read_text()
-    updated_html = update_html(html, cycle, total_memory, kira_memory, verse_memory, history)
+    # Update index.html (root)
+    try:
+        index_file = HTML_FILES['index']
+        if index_file.exists():
+            html = index_file.read_text()
+            updated = update_index_html(html, cycle, total_memory, kira_memory, verse_memory, day)
+            index_file.write_text(updated)
+            updated_files.append(str(index_file))
+    except Exception as e:
+        errors.append(f"index.html: {e}")
 
-    # Write updated HTML
-    INDEX_FILE.write_text(updated_html)
-    OUTPUT_FILE.write_text(updated_html)  # Also copy to root
+    # Update website/index.html
+    try:
+        website_index = HTML_FILES['website_index']
+        if website_index.exists():
+            html = website_index.read_text()
+            updated = update_index_html(html, cycle, total_memory, kira_memory, verse_memory, day)
+            website_index.write_text(updated)
+            updated_files.append(str(website_index))
+    except Exception as e:
+        errors.append(f"website/index.html: {e}")
 
-    print(f"\nUpdated:")
-    print(f"  {INDEX_FILE}")
-    print(f"  {OUTPUT_FILE}")
+    # Update world-viewer.html
+    try:
+        viewer_file = HTML_FILES['world_viewer']
+        if viewer_file.exists():
+            html = viewer_file.read_text()
+            updated = update_world_viewer_html(html, cycle, kira_memory, verse_memory, day)
+            viewer_file.write_text(updated)
+            updated_files.append(str(viewer_file))
+    except Exception as e:
+        errors.append(f"world-viewer.html: {e}")
+
+    # Report results
+    print(f"\nUpdated {len(updated_files)} file(s):")
+    for f in updated_files:
+        print(f"  ✓ {f}")
+
+    if errors:
+        print(f"\nErrors ({len(errors)}):")
+        for e in errors:
+            print(f"  ✗ {e}")
 
     print("\n" + "=" * 60)
-    print("WEBSITE UPDATE COMPLETE")
+    print("SYNC COMPLETE")
     print("=" * 60)
-    print("\nTo deploy: push index.html to your GitHub repo")
+
+    return len(errors) == 0
 
 
 if __name__ == "__main__":
-    main()
+    success = main()
+    exit(0 if success else 1)
